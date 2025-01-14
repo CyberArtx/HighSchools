@@ -438,4 +438,12 @@
 
         function deleteRow(index) {
             if (confirm('Are you sure you want to delete this row?')) {
-                schoolsData
+                schoolsData.splice(index, 1);
+                loadTableData();
+                saveToLocalStorage();
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('schoolsData', JSON.stringify(schoolsData));
+            localStorage.setItem('columns', JSON.stringify(
