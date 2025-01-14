@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schools Database</title>
-    <!-- Include required libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -72,7 +71,7 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
             overflow-x: auto;
             margin-top: 20px;
-            padding: 0 10px;
+            padding: 10px;
         }
 
         table {
@@ -87,26 +86,24 @@
             font-weight: 600;
             color: #2c3e50;
             border-bottom: 2px solid #e1e8ed;
-            min-width: 250px;
+            min-width: 200px;
             white-space: normal;
         }
 
         td {
-            padding: 15px;
+            padding: 8px;
             border-bottom: 1px solid #e1e8ed;
             vertical-align: top;
-            min-width: 250px;
         }
 
         input[type="text"] {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #e1e8ed;
             border-radius: 6px;
             transition: all 0.3s;
-            min-height: 40px;
+            min-height: 36px;
             font-size: 14px;
-            line-height: 1.4;
         }
 
         input[type="text"]:focus {
@@ -134,7 +131,6 @@
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
-            transition: all 0.3s;
         }
 
         .delete-btn:hover {
@@ -144,61 +140,9 @@
         .file-input {
             display: none;
         }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .modal-title {
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 1rem;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
     </style>
 </head>
 <body>
-    <!-- Add Column Modal -->
-    <div id="addColumnModal" class="modal">
-        <div class="modal-content">
-            <h3 class="modal-title">Add New Column</h3>
-            <input type="text" id="newColumnName" class="modal-input" placeholder="Enter column name">
-            <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="addNewColumn()">Add</button>
-                <button class="btn" onclick="closeModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
     <div class="main-container">
         <div class="button-group">
             <button class="btn btn-success" onclick="addRow()">
@@ -208,15 +152,12 @@
             <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
                 <i class="fas fa-file-import"></i> Import Excel
             </button>
-            <button class="btn btn-warning" onclick="showAddColumnModal()">
-                <i class="fas fa-columns"></i> Add Column
-            </button>
         </div>
 
         <div class="table-container">
             <table id="schoolsTable">
                 <thead>
-                    <tr id="headerRow">
+                    <tr>
                         <th>School name</th>
                         <th>Field of study</th>
                         <th>Address</th>
@@ -234,11 +175,7 @@
     </div>
 
     <script>
-        let columns = [
-            'schoolName', 'fieldOfStudy', 'address', 'price', 'theWay', 
-            'students', 'applications', 'link'
-        ];
-
+        // Initial data
         let schoolsData = [
             {
                 schoolName: "Oxford University",
@@ -249,193 +186,61 @@
                 students: "500",
                 applications: "Online",
                 link: "https://www.ox.ac.uk/"
-            },
-            {
-                schoolName: "MIT",
-                fieldOfStudy: "Engineering",
-                address: "Cambridge, MA 02139",
-                price: "$53,790/year",
-                theWay: "Part-time",
-                students: "1000",
-                applications: "Online + Paper",
-                link: "https://www.mit.edu"
             }
         ];
 
-        function showAddColumnModal() {
-            document.getElementById('addColumnModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('addColumnModal').style.display = 'none';
-        }
-
-        function addNewColumn() {
-            const columnName = document.getElementById('newColumnName').value.trim();
-            if (columnName) {
-                const columnKey = columnName.toLowerCase().replace(/\s+/g, '');
-                columns.push(columnKey);
-
-                const headerRow = document.getElementById('headerRow');
-                const th = document.createElement('th');
-                th.textContent = columnName;
-                headerRow.insertBefore(th, headerRow.lastElementChild);
-
-                schoolsData.forEach(row => {
-                    row[columnKey] = '';
-                });
-
-                loadTableData();
-                closeModal();
-                document.getElementById('newColumnName').value = '';
-                saveToLocalStorage();
-            }
-        }
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    try {
-                        const workbook = XLSX.read(data, {
-                            type: 'array',
-                            raw: false,
-                            cellDates: true
-                        });
-                        
-                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-                            raw: false,
-                            defval: '',
-                            blankrows: false
-                        });
-
-                        console.log("Original Excel data:", jsonData[0]);
-
-                        const mappedData = jsonData.map(row => {
-                            const getName = (names) => {
-                                for (let name of names) {
-                                    if (row[name] !== undefined) return row[name];
-                                }
-                                return '';
-                            };
-
-                            return {
-                                schoolName: getName([
-                                    'School name', 'Škola', 'Skola', 'Název školy', 'Nazev skoly',
-                                    'SCHOOL NAME', 'ŠKOLA', 'SKOLA', 'NÁZEV ŠKOLY', 'NAZEV SKOLY',
-                                    'school name', 'škola', 'skola', 'název školy', 'nazev skoly'
-                                ]),
-                                fieldOfStudy: getName([
-                                    'Field of study', 'Obor', 'Studijní obor', 'Studijni obor',
-                                    'FIELD OF STUDY', 'OBOR', 'STUDIJNÍ OBOR', 'STUDIJNI OBOR',
-                                    'field of study', 'studijní obor', 'studijni obor'
-                                ]),
-                                address: getName([
-                                    'Address', 'Adresa', 'ADDRESS', 'ADRESA', 
-                                    'address', 'adresa'
-                                ]),
-                                price: getName([
-                                    'Price', 'Cena', 'PRICE', 'CENA', 
-                                    'price', 'cena'
-                                ]),
-                                theWay: getName([
-                                    'The way', 'Způsob', 'Zpusob', 'THE WAY', 'ZPŮSOB', 'ZPUSOB',
-                                    'the way', 'způsob', 'zpusob'
-                                ]),
-                                students: getName([
-                                    'Students', 'Studenti', 'STUDENTS', 'STUDENTI',
-                                    'students', 'studenti'
-                                ]),
-                                applications: getName([
-                                    'Applications', 'Přihlášky', 'Prihlasky',
-                                    'APPLICATIONS', 'PŘIHLÁŠKY', 'PRIHLASKY',
-                                    'applications', 'přihlášky', 'prihlasky'
-                                ]),
-                                link: getName([
-                                    'Link', 'Odkaz', 'LINK', 'ODKAZ',
-                                    'link', 'odkaz'
-                                ])
-                            };
-                        });
-
-                        console.log("Mapped data:", mappedData[0]);
-
-                        const append = confirm('Do you want to append the data? Click OK to append, Cancel to replace existing data');
-                        
-                        if (append) {
-                            schoolsData = [...schoolsData, ...mappedData];
-                        } else {
-                            schoolsData = mappedData;
-                        }
-                        
-                        loadTableData();
-                        saveToLocalStorage();
-                    } catch (error) {
-                        console.error("Error processing Excel file:", error);
-                        alert("Error processing Excel file. Please check the console for details.");
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            }
-        }
-
+        // Load table data
         function loadTableData() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
             
             schoolsData.forEach((school, index) => {
                 const row = document.createElement('tr');
-                let html = '';
-                
-                columns.forEach(column => {
-                    if (column === 'link') {
-                        html += `
-                            <td class="link-cell">
-                                <input type="text" value="${school[column] || ''}" 
-                                       onchange="updateData(${index}, '${column}', this.value)">
-                                ${school[column] ? `<a href="${school[column]}" target="_blank" class="link-icon">
-                                    <i class="fas fa-external-link-alt"></i>
-                                </a>` : ''}
-                            </td>`;
-                    } else {
-                        html += `
-                            <td>
-                                <input type="text" value="${school[column] || ''}" 
-                                       onchange="updateData(${index}, '${column}', this.value)">
-                            </td>`;
-                    }
-                });
-                
-                html += `
+                row.innerHTML = `
+                    <td><input type="text" value="${school.schoolName || ''}" onchange="updateData(${index}, 'schoolName', this.value)"></td>
+                    <td><input type="text" value="${school.fieldOfStudy || ''}" onchange="updateData(${index}, 'fieldOfStudy', this.value)"></td>
+                    <td><input type="text" value="${school.address || ''}" onchange="updateData(${index}, 'address', this.value)"></td>
+                    <td><input type="text" value="${school.price || ''}" onchange="updateData(${index}, 'price', this.value)"></td>
+                    <td><input type="text" value="${school.theWay || ''}" onchange="updateData(${index}, 'theWay', this.value)"></td>
+                    <td><input type="text" value="${school.students || ''}" onchange="updateData(${index}, 'students', this.value)"></td>
+                    <td><input type="text" value="${school.applications || ''}" onchange="updateData(${index}, 'applications', this.value)"></td>
+                    <td class="link-cell">
+                        <input type="text" value="${school.link || ''}" onchange="updateData(${index}, 'link', this.value)">
+                        ${school.link ? `<a href="${school.link}" target="_blank" class="link-icon"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                    </td>
                     <td>
                         <button class="delete-btn" onclick="deleteRow(${index})">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </td>`;
-                
-                row.innerHTML = html;
+                    </td>
+                `;
                 tableBody.appendChild(row);
             });
         }
 
+        // Add new row
         function addRow() {
-            const newRow = {};
-            columns.forEach(column => {
-                newRow[column] = '';
+            schoolsData.push({
+                schoolName: "",
+                fieldOfStudy: "",
+                address: "",
+                price: "",
+                theWay: "",
+                students: "",
+                applications: "",
+                link: ""
             });
-            schoolsData.push(newRow);
             loadTableData();
             saveToLocalStorage();
         }
 
+        // Update data
         function updateData(index, field, value) {
             schoolsData[index][field] = value;
             saveToLocalStorage();
         }
 
+        // Delete row
         function deleteRow(index) {
             if (confirm('Are you sure you want to delete this row?')) {
                 schoolsData.splice(index, 1);
@@ -444,6 +249,59 @@
             }
         }
 
+        // Save to localStorage
         function saveToLocalStorage() {
             localStorage.setItem('schoolsData', JSON.stringify(schoolsData));
-            localStorage.setItem('columns', JSON.stringify(
+        }
+
+        // Load from localStorage
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('schoolsData');
+            if (saved) {
+                schoolsData = JSON.parse(saved);
+            }
+        }
+
+        // Handle file import
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {raw: false});
+                    
+                    const mappedData = jsonData.map(row => ({
+                        schoolName: row['School name'] || row['Škola'] || row['Název školy'] || '',
+                        fieldOfStudy: row['Field of study'] || row['Obor'] || row['Studijní obor'] || '',
+                        address: row['Address'] || row['Adresa'] || '',
+                        price: row['Price'] || row['Cena'] || '',
+                        theWay: row['The way'] || row['Způsob'] || '',
+                        students: row['Students'] || row['Studenti'] || '',
+                        applications: row['Applications'] || row['Přihlášky'] || '',
+                        link: row['Link'] || row['Odkaz'] || ''
+                    }));
+                    
+                    const append = confirm('Do you want to append the data? Click OK to append, Cancel to replace existing data');
+                    
+                    if (append) {
+                        schoolsData = [...schoolsData, ...mappedData];
+                    } else {
+                        schoolsData = mappedData;
+                    }
+                    
+                    loadTableData();
+                    saveToLocalStorage();
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        // Initialize
+        loadFromLocalStorage();
+        loadTableData();
+    </script>
+</body>
+</html>
