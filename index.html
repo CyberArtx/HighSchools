@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- [Previous head and style sections remain the same] -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schools Database</title>
     <style>
-        /* Login form styles */
+        /* [Previous styles remain the same] */
         .login-container {
             display: flex;
             justify-content: center;
@@ -40,7 +41,6 @@
             background: #45a049;
         }
 
-        /* Table styles */
         .main-container {
             display: none;
             padding: 20px;
@@ -106,9 +106,9 @@
                     <th>Address</th>
                     <th>Price</th>
                     <th>The way</th>
-                    <th>Link</th>
                     <th>Students</th>
                     <th>Applications</th>
+                    <th>Link</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -142,9 +142,9 @@
                 address: "Oxford OX1 2JD, UK",
                 price: "$45,000/year",
                 theWay: "Full-time",
-                link: "https://www.ox.ac.uk/",
                 students: "500",
-                applications: "Online"
+                applications: "Online",
+                link: "https://www.ox.ac.uk/"
             },
             {
                 schoolName: "MIT",
@@ -152,9 +152,9 @@
                 address: "Cambridge, MA 02139",
                 price: "$53,790/year",
                 theWay: "Part-time",
-                link: "https://www.mit.edu",
                 students: "1000",
-                applications: "Online + Paper"
+                applications: "Online + Paper",
+                link: "https://www.mit.edu"
             }
         ];
 
@@ -171,12 +171,12 @@
                     <td><input type="text" value="${school.address}" onchange="updateData(${index}, 'address', this.value)"></td>
                     <td><input type="text" value="${school.price}" onchange="updateData(${index}, 'price', this.value)"></td>
                     <td><input type="text" value="${school.theWay}" onchange="updateData(${index}, 'theWay', this.value)"></td>
+                    <td><input type="text" value="${school.students}" onchange="updateData(${index}, 'students', this.value)"></td>
+                    <td><input type="text" value="${school.applications}" onchange="updateData(${index}, 'applications', this.value)"></td>
                     <td class="link-cell">
                         <input type="text" value="${school.link}" onchange="updateData(${index}, 'link', this.value)">
                         <a href="${school.link}" target="_blank">🔗</a>
                     </td>
-                    <td><input type="text" value="${school.students}" onchange="updateData(${index}, 'students', this.value)"></td>
-                    <td><input type="text" value="${school.applications}" onchange="updateData(${index}, 'applications', this.value)"></td>
                     <td><button class="delete-button" onclick="deleteRow(${index})">Delete</button></td>
                 `;
                 tableBody.appendChild(row);
@@ -191,9 +191,9 @@
                 address: "",
                 price: "",
                 theWay: "",
-                link: "",
                 students: "",
-                applications: ""
+                applications: "",
+                link: ""
             });
             loadTableData();
             saveToLocalStorage();
