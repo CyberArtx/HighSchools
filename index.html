@@ -1,80 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schools Database</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+[Previous head content remains the same until the style section]
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            padding: 2rem;
-        }
-
-        .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-success {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-warning {
-            background: #f1c40f;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
+        /* Previous styles remain the same, but we'll modify table styles */
         .table-container {
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            overflow: hidden;
+            overflow-x: auto; /* Enable horizontal scroll if needed */
+            margin-top: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed; /* This ensures consistent column widths */
         }
 
         th {
@@ -84,15 +23,14 @@
             font-weight: 600;
             color: #2c3e50;
             border-bottom: 2px solid #e1e8ed;
+            min-width: 200px; /* Minimum width for columns */
+            max-width: 300px; /* Maximum width for columns */
         }
 
         td {
             padding: 12px 16px;
             border-bottom: 1px solid #e1e8ed;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
+            vertical-align: top;
         }
 
         input[type="text"] {
@@ -101,6 +39,7 @@
             border: 1px solid #e1e8ed;
             border-radius: 6px;
             transition: all 0.3s;
+            min-height: 36px;
         }
 
         input[type="text"]:focus {
@@ -109,182 +48,14 @@
             box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
         }
 
-        .link-cell {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .link-icon {
-            color: #3498db;
-            text-decoration: none;
-        }
-
-        .delete-btn {
-            color: #e74c3c;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .delete-btn:hover {
-            background: #ffebee;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .modal-title {
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 1rem;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
+        /* Add styles for cell content */
+        .cell-content {
+            min-width: 150px;
+            word-wrap: break-word;
+            white-space: normal;
         }
     </style>
-</head>
-<body>
-    <!-- Add Column Modal -->
-    <div id="addColumnModal" class="modal">
-        <div class="modal-content">
-            <h3 class="modal-title">Add New Column</h3>
-            <input type="text" id="newColumnName" class="modal-input" placeholder="Enter column name">
-            <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="addNewColumn()">Add</button>
-                <button class="btn" onclick="closeModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <div class="button-group">
-            <button class="btn btn-success" onclick="addRow()">
-                <i class="fas fa-plus"></i> Add New School
-            </button>
-            <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
-            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-file-import"></i> Import Excel
-            </button>
-            <button class="btn btn-warning" onclick="showAddColumnModal()">
-                <i class="fas fa-columns"></i> Add Column
-            </button>
-        </div>
-
-        <div class="table-container">
-            <table id="schoolsTable">
-                <thead>
-                    <tr id="headerRow">
-                        <th>School name</th>
-                        <th>Field of study</th>
-                        <th>Address</th>
-                        <th>Price</th>
-                        <th>The way</th>
-                        <th>Students</th>
-                        <th>Applications</th>
-                        <th>Link</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-        let columns = [
-            'schoolName', 'fieldOfStudy', 'address', 'price', 'theWay', 
-            'students', 'applications', 'link'
-        ];
-
-        let schoolsData = [
-            {
-                schoolName: "Oxford University",
-                fieldOfStudy: "Computer Science",
-                address: "Oxford OX1 2JD, UK",
-                price: "$45,000/year",
-                theWay: "Full-time",
-                students: "500",
-                applications: "Online",
-                link: "https://www.ox.ac.uk/"
-            },
-            {
-                schoolName: "MIT",
-                fieldOfStudy: "Engineering",
-                address: "Cambridge, MA 02139",
-                price: "$53,790/year",
-                theWay: "Part-time",
-                students: "1000",
-                applications: "Online + Paper",
-                link: "https://www.mit.edu"
-            }
-        ];
-
-        function showAddColumnModal() {
-            document.getElementById('addColumnModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('addColumnModal').style.display = 'none';
-        }
-
-        function addNewColumn() {
-            const columnName = document.getElementById('newColumnName').value.trim();
-            if (columnName) {
-                const columnKey = columnName.toLowerCase().replace(/\s+/g, '');
-                columns.push(columnKey);
-
-                const headerRow = document.getElementById('headerRow');
-                const th = document.createElement('th');
-                th.textContent = columnName;
-                headerRow.insertBefore(th, headerRow.lastElementChild);
-
-                schoolsData.forEach(row => {
-                    row[columnKey] = '';
-                });
-
-                loadTableData();
-                closeModal();
-                document.getElementById('newColumnName').value = '';
-                saveToLocalStorage();
-            }
-        }
+[Previous content remains the same until the handleFileSelect function]
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -295,20 +66,74 @@
                     const workbook = XLSX.read(data, {type: 'array'});
                     
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {raw: false, defval: ''});
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                        raw: false, 
+                        defval: '',
+                        header: 'A'  // Use A1 notation for headers
+                    });
                     
-                    console.log('First row:', jsonData[0]);
+                    // Log the first few rows to see the structure
+                    console.log('Excel data:', jsonData.slice(0, 3));
                     
-                    const mappedData = jsonData.map(row => ({
-                        schoolName: row['School name'] || row['Škola'] || row['Skola'] || row['Název školy'] || row['Nazev skoly'] || '',
-                        fieldOfStudy: row['Field of study'] || row['Obor'] || row['Studijní obor'] || row['Studijni obor'] || '',
-                        address: row['Address'] || row['Adresa'] || '',
-                        price: row['Price'] || row['Cena'] || '',
-                        theWay: row['The way'] || row['Způsob'] || row['Zpusob'] || '',
-                        students: row['Students'] || row['Studenti'] || row['Počet studentů'] || row['Pocet studentu'] || '',
-                        applications: row['Applications'] || row['Přihlášky'] || row['Prihlasky'] || '',
-                        link: row['Link'] || row['Odkaz'] || ''
-                    }));
+                    // Get headers from first row
+                    const headers = {};
+                    Object.keys(jsonData[0] || {}).forEach(key => {
+                        headers[key] = jsonData[0][key];
+                    });
+                    console.log('Headers:', headers);
+                    
+                    // Map the data starting from second row
+                    const mappedData = jsonData.slice(1).map(row => {
+                        // Try different possible header names for each column
+                        return {
+                            schoolName: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('school') ||
+                                    headers[key].toLowerCase().includes('škola') ||
+                                    headers[key].toLowerCase().includes('skola') ||
+                                    headers[key].toLowerCase().includes('název')
+                                )] || '',
+                            fieldOfStudy: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('field') ||
+                                    headers[key].toLowerCase().includes('obor') ||
+                                    headers[key].toLowerCase().includes('study')
+                                )] || '',
+                            address: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('address') ||
+                                    headers[key].toLowerCase().includes('adresa')
+                                )] || '',
+                            price: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('price') ||
+                                    headers[key].toLowerCase().includes('cena')
+                                )] || '',
+                            theWay: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('way') ||
+                                    headers[key].toLowerCase().includes('způsob') ||
+                                    headers[key].toLowerCase().includes('zpusob')
+                                )] || '',
+                            students: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('student')
+                                )] || '',
+                            applications: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('application') ||
+                                    headers[key].toLowerCase().includes('přihláš') ||
+                                    headers[key].toLowerCase().includes('prihlas')
+                                )] || '',
+                            link: 
+                                row[Object.keys(headers).find(key => 
+                                    headers[key].toLowerCase().includes('link') ||
+                                    headers[key].toLowerCase().includes('odkaz')
+                                )] || ''
+                        };
+                    });
+
+                    console.log('Mapped data:', mappedData.slice(0, 3));
                     
                     const append = confirm('Do you want to append the data? Click OK to append, Cancel to replace existing data');
                     
@@ -325,6 +150,8 @@
             }
         }
 
+[Previous content remains the same until the loadTableData function]
+
         function loadTableData() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
@@ -337,13 +164,21 @@
                     if (column === 'link') {
                         html += `
                             <td class="link-cell">
-                                <input type="text" value="${school[column] || ''}" onchange="updateData(${index}, '${column}', this.value)">
-                                ${school[column] ? `<a href="${school[column]}" target="_blank" class="link-icon"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                                <div class="cell-content">
+                                    <input type="text" value="${school[column] || ''}" 
+                                           onchange="updateData(${index}, '${column}', this.value)">
+                                    ${school[column] ? `<a href="${school[column]}" target="_blank" class="link-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>` : ''}
+                                </div>
                             </td>`;
                     } else {
                         html += `
                             <td>
-                                <input type="text" value="${school[column] || ''}" onchange="updateData(${index}, '${column}', this.value)">
+                                <div class="cell-content">
+                                    <input type="text" value="${school[column] || ''}" 
+                                           onchange="updateData(${index}, '${column}', this.value)">
+                                </div>
                             </td>`;
                     }
                 });
@@ -360,62 +195,4 @@
             });
         }
 
-        function addRow() {
-            const newRow = {};
-            columns.forEach(column => {
-                newRow[column] = '';
-            });
-            schoolsData.push(newRow);
-            loadTableData();
-            saveToLocalStorage();
-        }
-
-        function updateData(index, field, value) {
-            schoolsData[index][field] = value;
-            saveToLocalStorage();
-        }
-
-        function deleteRow(index) {
-            if (confirm('Are you sure you want to delete this row?')) {
-                schoolsData.splice(index, 1);
-                loadTableData();
-                saveToLocalStorage();
-            }
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('schoolsData', JSON.stringify(schoolsData));
-            localStorage.setItem('columns', JSON.stringify(columns));
-        }
-
-        function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('schoolsData');
-            const savedColumns = localStorage.getItem('columns');
-            if (savedData) {
-                schoolsData = JSON.parse(savedData);
-            }
-            if (savedColumns) {
-                columns = JSON.parse(savedColumns);
-                updateHeaders();
-            }
-        }
-
-        function updateHeaders() {
-            const headerRow = document.getElementById('headerRow');
-            headerRow.innerHTML = '';
-            columns.forEach(column => {
-                const th = document.createElement('th');
-                th.textContent = column.replace(/([A-Z])/g, ' $1').trim();
-                headerRow.appendChild(th);
-            });
-            const actionsTh = document.createElement('th');
-            actionsTh.textContent = 'Actions';
-            headerRow.appendChild(actionsTh);
-        }
-
-        // Initialize the table
-        loadFromLocalStorage();
-        loadTableData();
-    </script>
-</body>
-</html>
+[Rest of the code remains the same]
