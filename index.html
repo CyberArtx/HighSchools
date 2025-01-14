@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schools Database</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        /* Login form styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+        .login-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .login-form input {
+            display: block;
+            margin: 10px 0;
+            padding: 8px;
+            width: 250px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .login-form button {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login-form button:hover {
+            background: #45a049;
+        }
+
+        /* Table styles */
+        .main-container {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .add-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .delete-button {
+            background: #ff4444;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .link-cell a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .link-cell a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginForm" class="login-container">
+        <form class="login-form" onsubmit="return login(event)">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="mainContent" class="main-container">
+        <button class="add-button" onclick="addRow()">Add New School</button>
+        <table id="schoolsTable">
+            <thead>
+                <tr>
+                    <th>School name</th>
+                    <th>Field of study</th>
+                    <th>Address</th>
+                    <th>Price</th>
+                    <th>The way</th>
+                    <th>Link</th>
+                    <th>Students</th>
+                    <th>Applications</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Authentication credentials (hashed)
+        const CORRECT_USERNAME = 'ViktorieS2009';
+        const CORRECT_PASSWORD_HASH = '7c2e9d0b5c5a5e5c4c7b2d4f3a1e8d9b'; // Hashed version of FaktNevimKamChciJit2025
+
+        // Initial data
+        let schoolsData = [
+            {
+                schoolName: "Oxford University",
+                fieldOfStudy: "Computer Science",
+                address: "Oxford OX1 2JD, UK",
+                price: "$45,000/year",
+                theWay: "Full-time",
+                link: "https://www.ox.ac.uk/",
+                students: "500",
+                applications: "Online"
+            },
+            {
+                schoolName: "MIT",
+                fieldOfStudy: "Engineering",
+                address: "Cambridge, MA 02139",
+                price: "$53,790/year",
+                theWay: "Part-time",
+                link: "https://www.mit.edu",
+                students: "1000",
+                applications: "Online + Paper"
+            }
+        ];
+
+        // Login function
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === CORRECT_USERNAME && CryptoJS.MD5(password).toString() === CORRECT_PASSWORD_HASH) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                loadTableData();
+            } else {
+                alert('Invalid credentials!');
+            }
+            return false;
+        }
+
+        // Load table data
+        function loadTableData() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            schoolsData.forEach((school, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" value="${school.schoolName}" onchange="updateData(${index}, 'schoolName', this.value)"></td>
+                    <td><input type="text" value="${school.fieldOfStudy}" onchange="updateData(${index}, 'fieldOfStudy', this.value)"></td>
+                    <td><input type="text" value="${school.address}" onchange="updateData(${index}, 'address', this.value)"></td>
+                    <td><input type="text" value="${school.price}" onchange="updateData(${index}, 'price', this.value)"></td>
+                    <td><input type="text" value="${school.theWay}" onchange="updateData(${index}, 'theWay', this.value)"></td>
+                    <td class="link-cell">
+                        <input type="text" value="${school.link}" onchange="updateData(${index}, 'link', this.value)">
+                        <a href="${school.link}" target="_blank">🔗</a>
+                    </td>
+                    <td><input type="text" value="${school.students}" onchange="updateData(${index}, 'students', this.value)"></td>
+                    <td><input type="text" value="${school.applications}" onchange="updateData(${index}, 'applications', this.value)"></td>
+                    <td><button class="delete-button" onclick="deleteRow(${index})">Delete</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Add new row
+        function addRow() {
+            schoolsData.push({
+                schoolName: "",
+                fieldOfStudy: "",
+                address: "",
+                price: "",
+                theWay: "",
+                link: "",
+                students: "",
+                applications: ""
+            });
+            loadTableData();
+        }
+
+        // Update data
+        function updateData(index, field, value) {
+            schoolsData[index][field] = value;
+            saveToLocalStorage();
+        }
+
+        // Delete row
+        function deleteRow(index) {
+            if (confirm('Are you sure you want to delete this row?')) {
+                schoolsData.splice(index, 1);
+                loadTableData();
+                saveToLocalStorage();
+            }
+        }
+
+        // Save to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('schoolsData', JSON.stringify(schoolsData));
+        }
+
+        // Load from localStorage
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('schoolsData');
+            if (saved) {
+                schoolsData = JSON.parse(saved);
+            }
+        }
+
+        // Load saved data when starting
+        loadFromLocalStorage();
+    </script>
+</body>
+</html>
