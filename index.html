@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- [Previous head and style sections remain the same] -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schools Database</title>
+    <!-- Add SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* [Previous styles remain the same] */
+        /* Previous styles remain the same */
         .login-container {
             display: flex;
             justify-content: center;
@@ -60,14 +61,21 @@
         th {
             background-color: #f4f4f4;
         }
-        .add-button {
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .add-button, .import-button {
             background: #4CAF50;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-bottom: 20px;
+        }
+        .import-button {
+            background: #2196F3;
         }
         .delete-button {
             background: #ff4444;
@@ -84,6 +92,9 @@
         .link-cell a:hover {
             text-decoration: underline;
         }
+        .file-input {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -97,7 +108,11 @@
     </div>
 
     <div id="mainContent" class="main-container">
-        <button class="add-button" onclick="addRow()">Add New School</button>
+        <div class="button-container">
+            <button class="add-button" onclick="addRow()">Add New School</button>
+            <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
+            <button class="import-button" onclick="document.getElementById('fileInput').click()">Import from Excel</button>
+        </div>
         <table id="schoolsTable">
             <thead>
                 <tr>
@@ -117,7 +132,7 @@
     </div>
 
     <script>
-        // Simple authentication
+        // Previous authentication and data functions remain the same
         function login(event) {
             event.preventDefault();
             const username = document.getElementById('username').value;
@@ -157,6 +172,49 @@
                 link: "https://www.mit.edu"
             }
         ];
+
+        // Handle Excel file import
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // Get first worksheet
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    
+                    // Convert to JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    // Map Excel columns to our data structure
+                    const mappedData = jsonData.map(row => ({
+                        schoolName: row['School name'] || '',
+                        fieldOfStudy: row['Field of study'] || '',
+                        address: row['Address'] || '',
+                        price: row['Price'] || '',
+                        theWay: row['The way'] || '',
+                        students: row['Students'] || '',
+                        applications: row['Applications'] || '',
+                        link: row['Link'] || ''
+                    }));
+                    
+                    // Ask user if they want to replace or append data
+                    const append = confirm('Do you want to append the data? Click OK to append, Cancel to replace existing data');
+                    
+                    if (append) {
+                        schoolsData = [...schoolsData, ...mappedData];
+                    } else {
+                        schoolsData = mappedData;
+                    }
+                    
+                    loadTableData();
+                    saveToLocalStorage();
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
 
         // Load table data
         function loadTableData() {
