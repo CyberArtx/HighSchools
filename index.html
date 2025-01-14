@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schools Database</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         /* Login form styles */
         .login-container {
@@ -118,9 +117,22 @@
     </div>
 
     <script>
-        // Authentication credentials (hashed)
-        const CORRECT_USERNAME = 'ViktorieS2009';
-        const CORRECT_PASSWORD_HASH = '7c2e9d0b5c5a5e5c4c7b2d4f3a1e8d9b'; // Hashed version of FaktNevimKamChciJit2025
+        // Simple authentication
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'ViktorieS2009' && password === 'FaktNevimKamChciJit2025') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                loadTableData();
+                return false;
+            } else {
+                alert('Invalid credentials! Please try again.');
+                return false;
+            }
+        }
 
         // Initial data
         let schoolsData = [
@@ -145,22 +157,6 @@
                 applications: "Online + Paper"
             }
         ];
-
-        // Login function
-        function login(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username === CORRECT_USERNAME && CryptoJS.MD5(password).toString() === CORRECT_PASSWORD_HASH) {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                loadTableData();
-            } else {
-                alert('Invalid credentials!');
-            }
-            return false;
-        }
 
         // Load table data
         function loadTableData() {
@@ -200,6 +196,7 @@
                 applications: ""
             });
             loadTableData();
+            saveToLocalStorage();
         }
 
         // Update data
