@@ -185,19 +185,22 @@
                     // Get first worksheet
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     
-                    // Convert to JSON
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    // Convert to JSON with raw values
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {raw: false, defval: ''});
                     
-                    // Map Excel columns to our data structure
+                    // Log the first row to see the actual column names
+                    console.log('First row:', jsonData[0]);
+                    
+                    // Map Excel columns to our data structure with multiple possible column names
                     const mappedData = jsonData.map(row => ({
-                        schoolName: row['School name'] || '',
-                        fieldOfStudy: row['Field of study'] || '',
-                        address: row['Address'] || '',
-                        price: row['Price'] || '',
-                        theWay: row['The way'] || '',
-                        students: row['Students'] || '',
-                        applications: row['Applications'] || '',
-                        link: row['Link'] || ''
+                        schoolName: row['School name'] || row['Škola'] || row['Skola'] || row['Název školy'] || row['Nazev skoly'] || '',
+                        fieldOfStudy: row['Field of study'] || row['Obor'] || row['Studijní obor'] || row['Studijni obor'] || '',
+                        address: row['Address'] || row['Adresa'] || '',
+                        price: row['Price'] || row['Cena'] || '',
+                        theWay: row['The way'] || row['Způsob'] || row['Zpusob'] || '',
+                        students: row['Students'] || row['Studenti'] || row['Počet studentů'] || row['Pocet studentu'] || '',
+                        applications: row['Applications'] || row['Přihlášky'] || row['Prihlasky'] || '',
+                        link: row['Link'] || row['Odkaz'] || ''
                     }));
                     
                     // Ask user if they want to replace or append data
